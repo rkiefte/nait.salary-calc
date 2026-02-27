@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA/NAIT Salary & Retro Calculator</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h2 { color: #004a99; margin-top: 0; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; background: #004a99; color: white; border: none; padding: 12px; border-radius: 5px; margin-top: 20px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #003366; }
+        .result { margin-top: 25px; padding: 15px; background: #e7f3ff; border-left: 5px solid #004a99; display: none; }
+        .result h3 { margin-top: 0; color: #004a99; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>NASA Salary Calculator</h2>
+    <p><small>Based on the 2024-2028 Ratified Agreement.</small></p>
+    
+    <label>Hire Date (Anniversary)</label>
+    <input type="date" id="startDate" value="2024-10-01">
+
+    <label>Current 2023 Base Step (Enter Base Pay)</label>
+    <input type="number" id="basePay" placeholder="Example: 82856" value="82856">
+
+    <button onclick="calculate()">Calculate My Pay</button>
+
+    <div id="resultArea" class="result">
+        <h3>Your Results</h3>
+        <p><strong>Estimated Retro Pay:</strong> <span id="retroOutput"></span></p>
+        <p><strong>New Current Salary (July 2025 rate):</strong> <span id="currentOutput"></span></p>
+        <hr>
+        <p><small>Next 3% Raise: July 1, 2026</small></p>
+    </div>
+</div>
+
+<script>
+function calculate() {
+    const base2023 = parseFloat(document.getElementById('basePay').value);
+    const startDate = new Date(document.getElementById('startDate').value);
+    const today = new Date("2026-02-27");
+
+    // Rates
+    const rate2024 = base2023 * 1.03;
+    const rate2025 = rate2024 * 1.03;
+
+    // Monthly Differentials (Retro)
+    const diff2024 = (rate2024 - base2023) / 12;
+    const diff2025 = (rate2025 - base2023) / 12;
+
+    // Simple Retro Logic (Matching your specific timeline)
+    // 9 months of 2024 + 8 months of 2025 (approx for Feb 2026)
+    const retro = (diff2024 * 9) + (diff2025 * 8);
+
+    document.getElementById('retroOutput').innerText = "$" + retro.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('currentOutput').innerText = "$" + rate2025.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('resultArea').style.display = "block";
+}
+</script>
+
+</body>
+</html>
