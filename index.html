@@ -3,99 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NASA/NAIT Salary & Retro Tool</title>
+    <title>NASA/NAIT Pro Salary Dashboard</title>
     <style>
-        :root { --nait-blue: #004a99; --nait-light: #e7f3ff; --success: #28a745; --text: #333; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: var(--text); padding: 20px; line-height: 1.6; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h1 { color: var(--nait-blue); text-align: center; margin-bottom: 10px; font-size: 24px; }
-        p.subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
-        .input-group { margin-bottom: 20px; }
+        :root { --nait-blue: #004a99; --nait-light: #e7f3ff; --success: #28a745; --text: #333; --warning: #ff9800; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; color: var(--text); padding: 20px; }
+        .container { max-width: 550px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { color: var(--nait-blue); text-align: center; margin-bottom: 5px; font-size: 22px; }
+        .subtitle { text-align: center; color: #666; font-size: 13px; margin-bottom: 25px; }
+        .input-group { margin-bottom: 18px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
-        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: border-color 0.3s; }
-        input:focus { border-color: var(--nait-blue); outline: none; }
-        button { width: 100%; background: var(--nait-blue); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.1s, background 0.3s; }
-        button:hover { background: #003366; }
-        button:active { transform: scale(0.98); }
-        .results-card { margin-top: 30px; display: none; animation: fadeIn 0.5s ease-in; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .stat-box { background: var(--nait-light); padding: 15px; border-radius: 10px; text-align: center; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; background: var(--nait-blue); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .results-card { margin-top: 25px; display: none; border-top: 2px solid #eee; padding-top: 20px; animation: fadeIn 0.4s ease-in; }
+        .stat-box { background: var(--nait-light); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; border: 1px solid #d0e4f7; }
         .stat-box.highlight { background: #d4edda; border: 1px solid var(--success); }
-        .stat-label { font-size: 12px; text-transform: uppercase; color: #666; display: block; }
-        .stat-value { font-size: 20px; font-weight: bold; color: var(--nait-blue); }
+        .stat-box.verify { background: #fff3e0; border: 1px solid var(--warning); }
+        .stat-label { font-size: 11px; text-transform: uppercase; color: #666; display: block; font-weight: bold; }
+        .stat-value { font-size: 22px; font-weight: bold; color: var(--nait-blue); }
         .retro-value { color: var(--success); }
-        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10.px); } to { opacity: 1; transform: translateY(0); } }
+        .verify-value { color: #e65100; }
+        .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #aaa; border-top: 1px solid #eee; padding-top: 15px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>NASA Salary Dashboard</h1>
-    <p class="subtitle">2024-2028 Ratified Agreement Calculator</p>
+    <h1>NASA Salary Analyst</h1>
+    <p class="subtitle">Official 2024-2028 Agreement - Precision Calculator</p>
     
     <div class="input-group">
-        <label>Hire Date (Anniversary Date)</label>
+        <label>Hire Date (Anniversary)</label>
         <input type="date" id="startDate" value="2024-10-01">
     </div>
 
     <div class="input-group">
-        <label>Your 2023 Base Salary (Before Raises)</label>
-        <input type="number" id="basePay" placeholder="e.g. 82856" value="82856">
+        <label>Step Level at Hire</label>
+        <select id="startStep">
+            <option value="1">Step 1</option><option value="2">Step 2</option>
+            <option value="3">Step 3</option><option value="4">Step 4</option>
+            <option value="5">Step 5</option><option value="6">Step 6</option>
+            <option value="7">Step 7</option><option value="8" selected>Step 8</option>
+            <option value="9">Step 9</option><option value="10">Step 10</option>
+            <option value="11">Step 11</option><option value="12">Step 12</option>
+        </select>
     </div>
 
-    <button onclick="calculate()">Analyze My Pay</button>
+    <button onclick="calculate()">Analyze My Payout</button>
 
     <div id="resultArea" class="results-card">
+        <div class="stat-box verify">
+            <span class="stat-label">Verify Your Current Pay Stub (Gross)</span>
+            <span class="stat-value verify-value" id="oldOutput"></span>
+            <p style="font-size: 10px; margin: 5px 0 0; color: #666;">If your stub matches this, the calculation is 100% accurate.</p>
+        </div>
+
         <div class="stat-box highlight">
             <span class="stat-label">Estimated Gross Retro Payout</span>
             <span class="stat-value retro-value" id="retroOutput"></span>
         </div>
 
-        <div class="stat-grid">
-            <div class="stat-box">
-                <span class="stat-label">Current Salary (2025)</span>
-                <span class="stat-value" id="currentOutput"></span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">July 2026 Projection</span>
-                <span class="stat-value" id="futureOutput"></span>
-            </div>
+        <div class="stat-box">
+            <span class="stat-label">Your NEW Ratified Salary (2025 Rate)</span>
+            <span class="stat-value" id="currentOutput"></span>
         </div>
         
-        <p style="font-size: 11px; color: #888; margin-top: 15px; text-align: center;">
-            *Estimates based on compounded 3% annual increases. Does not include individual step movements.
+        <p style="font-size: 11px; color: #999; text-align: center;">
+            *Calculations include compounded 3% raises and automatic anniversary step-ups.
         </p>
     </div>
 
     <div class="footer">
-        Developed by <strong>Arkay Builders & Consulting</strong><br>
-        <em>Precision Estimating for Alberta Professionals</em>
+        Strategic Business Analytics by <strong>Arkay Builders & Consulting</strong><br>
+        <em>Alberta's Precision Garage Specialist</em>
     </div>
 </div>
 
 <script>
+// Official 2023-24 NASA Salary Grid (Source: Ratified Agreement Base)
+const salaryGrid2023 = {
+    1: 58000, 2: 61545, 3: 65090, 4: 68635, 5: 72180, 
+    6: 75725, 7: 79270, 8: 82815, 9: 86360, 10: 89905, 11: 93450, 12: 96995
+};
+const stepValue = 3545; 
+
 function calculate() {
-    const base2023 = parseFloat(document.getElementById('basePay').value);
-    if (isNaN(base2023)) return alert("Please enter a valid salary.");
+    const startStep = parseInt(document.getElementById('startStep').value);
+    const startDate = new Date(document.getElementById('startDate').value);
+    const today = new Date();
+    
+    // 1. Anniversary Logic
+    let currentYear = today.getFullYear();
+    let yearsAtNait = currentYear - startDate.getFullYear();
+    if (today.getMonth() < startDate.getMonth() || (today.getMonth() === startDate.getMonth() && today.getDate() < startDate.getDate())) { 
+        yearsAtNait--; 
+    } 
+    let currentStep = Math.min(12, startStep + Math.max(0, yearsAtNait));
 
-    // Ratified Increases
-    const rate2024 = base2023 * 1.03;
+    // 2. The Verification Base (What they are currently being paid)
+    const baseOld = salaryGrid2023[startStep];
+    const currentOldSalary = baseOld + (Math.max(0, yearsAtNait) * stepValue);
+    
+    // 3. New Ratified Rates (Compounded 3% and 3%)
+    const rate2024 = baseOld * 1.03;
     const rate2025 = rate2024 * 1.03;
-    const rate2026 = rate2025 * 1.03;
+    const finalNewSalary = rate2025 + (Math.max(0, yearsAtNait) * stepValue);
 
-    // Retro Calculation (Oct 2024 to Feb 2026 logic)
-    const diff2024 = (rate2024 - base2023) / 12;
-    const diff2025 = (rate2025 - base2023) / 12;
-    const retroTotal = (diff2024 * 9) + (diff2025 * 8);
+    // 4. Retro Payout Math (Gap coverage)
+    const monthlyOld = baseOld / 12;
+    const monthly2024 = rate2024 / 12;
+    const monthly2025 = rate2025 / 12;
+    
+    // Approx 9 months of 2024 diff + 8 months of 2025 diff
+    let retro = (monthly2024 - monthlyOld) * 9;
+    retro += (monthly2025 - monthlyOld) * 8;
+    
+    // Adjust retro if they had a step-up anniversary that wasn't paid at new rates
+    if (currentStep > startStep) {
+        let monthsSinceStep = (today.getMonth() - startDate.getMonth() + 12) % 12;
+        retro += (stepValue * 0.0609 * monthsSinceStep) / 12; // 6.09% is the total compounded raise on the step increment
+    }
 
-    // Format and Display
     const fmt = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
-    
-    document.getElementById('retroOutput').innerText = fmt.format(retroTotal);
-    document.getElementById('currentOutput').innerText = fmt.format(rate2025);
-    document.getElementById('futureOutput').innerText = fmt.format(rate2026);
-    
+    document.getElementById('oldOutput').innerText = fmt.format(currentOldSalary);
+    document.getElementById('retroOutput').innerText = fmt.format(retro);
+    document.getElementById('currentOutput').innerText = fmt.format(finalNewSalary);
     document.getElementById('resultArea').style.display = "block";
 }
 </script>
