@@ -3,62 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NASA/NAIT Salary & Retro Calculator</title>
+    <title>NASA/NAIT Salary & Retro Tool</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        h2 { color: #004a99; margin-top: 0; }
-        label { display: block; margin: 15px 0 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; background: #004a99; color: white; border: none; padding: 12px; border-radius: 5px; margin-top: 20px; cursor: pointer; font-size: 16px; }
+        :root { --nait-blue: #004a99; --nait-light: #e7f3ff; --success: #28a745; --text: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: var(--text); padding: 20px; line-height: 1.6; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { color: var(--nait-blue); text-align: center; margin-bottom: 10px; font-size: 24px; }
+        p.subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: border-color 0.3s; }
+        input:focus { border-color: var(--nait-blue); outline: none; }
+        button { width: 100%; background: var(--nait-blue); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.1s, background 0.3s; }
         button:hover { background: #003366; }
-        .result { margin-top: 25px; padding: 15px; background: #e7f3ff; border-left: 5px solid #004a99; display: none; }
-        .result h3 { margin-top: 0; color: #004a99; }
+        button:active { transform: scale(0.98); }
+        .results-card { margin-top: 30px; display: none; animation: fadeIn 0.5s ease-in; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .stat-box { background: var(--nait-light); padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-box.highlight { background: #d4edda; border: 1px solid var(--success); }
+        .stat-label { font-size: 12px; text-transform: uppercase; color: #666; display: block; }
+        .stat-value { font-size: 20px; font-weight: bold; color: var(--nait-blue); }
+        .retro-value { color: var(--success); }
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10.px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>NASA Salary Calculator</h2>
-    <p><small>Based on the 2024-2028 Ratified Agreement.</small></p>
+<div class="container">
+    <h1>NASA Salary Dashboard</h1>
+    <p class="subtitle">2024-2028 Ratified Agreement Calculator</p>
     
-    <label>Hire Date (Anniversary)</label>
-    <input type="date" id="startDate" value="2024-10-01">
+    <div class="input-group">
+        <label>Hire Date (Anniversary Date)</label>
+        <input type="date" id="startDate" value="2024-10-01">
+    </div>
 
-    <label>Current 2023 Base Step (Enter Base Pay)</label>
-    <input type="number" id="basePay" placeholder="Example: 82856" value="82856">
+    <div class="input-group">
+        <label>Your 2023 Base Salary (Before Raises)</label>
+        <input type="number" id="basePay" placeholder="e.g. 82856" value="82856">
+    </div>
 
-    <button onclick="calculate()">Calculate My Pay</button>
+    <button onclick="calculate()">Analyze My Pay</button>
 
-    <div id="resultArea" class="result">
-        <h3>Your Results</h3>
-        <p><strong>Estimated Retro Pay:</strong> <span id="retroOutput"></span></p>
-        <p><strong>New Current Salary (July 2025 rate):</strong> <span id="currentOutput"></span></p>
-        <hr>
-        <p><small>Next 3% Raise: July 1, 2026</small></p>
+    <div id="resultArea" class="results-card">
+        <div class="stat-box highlight">
+            <span class="stat-label">Estimated Gross Retro Payout</span>
+            <span class="stat-value retro-value" id="retroOutput"></span>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <span class="stat-label">Current Salary (2025)</span>
+                <span class="stat-value" id="currentOutput"></span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">July 2026 Projection</span>
+                <span class="stat-value" id="futureOutput"></span>
+            </div>
+        </div>
+        
+        <p style="font-size: 11px; color: #888; margin-top: 15px; text-align: center;">
+            *Estimates based on compounded 3% annual increases. Does not include individual step movements.
+        </p>
+    </div>
+
+    <div class="footer">
+        Developed by <strong>Arkay Builders & Consulting</strong><br>
+        <em>Precision Estimating for Alberta Professionals</em>
     </div>
 </div>
 
 <script>
 function calculate() {
     const base2023 = parseFloat(document.getElementById('basePay').value);
-    const startDate = new Date(document.getElementById('startDate').value);
-    const today = new Date("2026-02-27");
+    if (isNaN(base2023)) return alert("Please enter a valid salary.");
 
-    // Rates
+    // Ratified Increases
     const rate2024 = base2023 * 1.03;
     const rate2025 = rate2024 * 1.03;
+    const rate2026 = rate2025 * 1.03;
 
-    // Monthly Differentials (Retro)
+    // Retro Calculation (Oct 2024 to Feb 2026 logic)
     const diff2024 = (rate2024 - base2023) / 12;
     const diff2025 = (rate2025 - base2023) / 12;
+    const retroTotal = (diff2024 * 9) + (diff2025 * 8);
 
-    // Simple Retro Logic (Matching your specific timeline)
-    // 9 months of 2024 + 8 months of 2025 (approx for Feb 2026)
-    const retro = (diff2024 * 9) + (diff2025 * 8);
-
-    document.getElementById('retroOutput').innerText = "$" + retro.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('currentOutput').innerText = "$" + rate2025.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    // Format and Display
+    const fmt = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
+    
+    document.getElementById('retroOutput').innerText = fmt.format(retroTotal);
+    document.getElementById('currentOutput').innerText = fmt.format(rate2025);
+    document.getElementById('futureOutput').innerText = fmt.format(rate2026);
+    
     document.getElementById('resultArea').style.display = "block";
 }
 </script>
