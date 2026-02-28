@@ -61,9 +61,9 @@
             <span class="val" id="outRetro" style="color: var(--success);"></span>
         </div>
 
-        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">5-Year Trajectory</h3>
+        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">Career Anniversary Trajectory</h3>
         <table>
-            <thead><tr><th>Date</th><th>Step</th><th>New Salary</th></tr></thead>
+            <thead><tr><th>Effective Date</th><th>Step</th><th>Annual Salary</th></tr></thead>
             <tbody id="outTable"></tbody>
         </table>
     </div>
@@ -74,7 +74,6 @@
 </div>
 
 <script>
-// Data from the NASA Pay Scale Grid
 const grid = {
     3: [65544, 67510.32, 69535.63, 71621.70, 73770.35],
     4: [69007, 71077.21, 73209.53, 75405.81, 77667.99],
@@ -98,11 +97,13 @@ function calculate() {
     const hStr = document.getElementById('hireDate').value;
     if (!currentStepInput || !hStr) return alert("Please select your hire date and current step.");
 
+    // Parse date properly for calculation
     const hireDate = new Date(hStr + "T00:00:00");
     const today = new Date("2026-02-27T00:00:00");
     const fmt = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
+    const dateFmt = { month: 'long', day: 'numeric', year: 'numeric' };
 
-    // Identify Start Step for Retro Pay Logic
+    // Find starting step by subtracting years elapsed (Logic remains unchanged)
     let yearsSinceHire = today.getFullYear() - hireDate.getFullYear();
     if (today.getMonth() < hireDate.getMonth() || (today.getMonth() === hireDate.getMonth() && today.getDate() < hireDate.getDate())) yearsSinceHire--;
     const startStep = Math.max(3, currentStepInput - yearsSinceHire);
@@ -131,17 +132,26 @@ function calculate() {
         tempDate.setMonth(tempDate.getMonth() + 1);
     }
 
-    // Trajectory Outlook
+    // Trajectory Outlook - Anniversary Milestones
     let tableHTML = "";
-    const timeline = [
-        { l: "Current (Ratified)", s: currentStepInput, i: 2 },
-        { l: "July 1, 2026", s: currentStepInput, i: 3 },
-        { l: "Oct " + today.getFullYear() + " (Step Up)", s: Math.min(17, currentStepInput + 1), i: 3 },
-        { l: "July 1, 2027", s: Math.min(17, currentStepInput + 1), i: 4 }
-    ];
-    timeline.forEach(t => {
-        tableHTML += `<tr><td>${t.l}</td><td>Step ${t.s}</td><td>${fmt.format(grid[t.s][t.i])}</td></tr>`;
-    });
+    
+    // 1. Current Ratified Status
+    tableHTML += `<tr><td><strong>Current (Ratified)</strong></td><td>Step ${currentStepInput}</td><td>${fmt.format(grid[currentStepInput][2])}</td></tr>`;
+
+    // 2. Build Anniversary milestones for next 3 years
+    for (let i = 1; i <= 3; i++) {
+        let nextAnniv = new Date(hireDate);
+        nextAnniv.setFullYear(today.getFullYear() + (today.getMonth() >= hireDate.getMonth() ? i : i - 1));
+        
+        // Ensure we don't duplicate today if it's the anniversary
+        if (nextAnniv <= today) continue;
+
+        let nextStep = Math.min(17, currentStepInput + i);
+        let yearIndex = 3; // Default to 2026-2027
+        if (nextAnniv >= new Date("2027-07-01")) yearIndex = 4; // 2027-2028
+        
+        tableHTML += `<tr><td>${nextAnniv.toLocaleDateString('en-CA', dateFmt)}</td><td>Step ${nextStep}</td><td>${fmt.format(grid[nextStep][yearIndex])}</td></tr>`;
+    }
 
     document.getElementById('outOld').innerText = fmt.format(grid[currentStepInput][0]);
     document.getElementById('outRetro').innerText = fmt.format(totalRetro);
