@@ -9,7 +9,7 @@
         body { font-family: -apple-system, sans-serif; background: #f0f4f8; color: var(--text); padding: 15px; margin: 0; }
         .container { max-width: 550px; margin: 20px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h1 { color: var(--blue); text-align: center; font-size: 22px; margin-bottom: 5px; }
-        .sub { text-align: center; color: #777; font-size: 14px; margin-bottom: 25px; }
+        .sub { text-align: center; color: #777; font-size: 13px; margin-bottom: 25px; }
         label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 14px; color: var(--blue); }
         input, select { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 20px; }
         button { width: 100%; background: var(--blue); color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 700; cursor: pointer; }
@@ -31,14 +31,14 @@
 
 <div class="container">
     <h1>NASA Salary Analyst</h1>
-    <p class="sub">Official NASA Pay Scale - No Fluff</p>
+    <p class="sub">Precision 2024-2028 Financial Dashboard</p>
     
-    <label>Date of Hire</label>
+    <label>Date of Hire (Anniversary Date)</label>
     <input type="date" id="hireDate">
 
     <label>Current Step</label>
     <select id="currStep">
-        <option value="" disabled selected>Choose Step...</option>
+        <option value="" disabled selected>Select your current step...</option>
         <option value="3">Step 3</option><option value="4">Step 4</option>
         <option value="5">Step 5</option><option value="6">Step 6</option>
         <option value="7">Step 7</option><option value="8">Step 8</option>
@@ -49,12 +49,13 @@
         <option value="17">Step 17</option>
     </select>
 
-    <button onclick="calculate()">Analyze My Pay & Retro</button>
+    <button onclick="calculate()">Run Financial Audit</button>
 
     <div id="results" class="results">
         <div class="card card-verify">
             <span class="tag">Verify Current Pay Stub (Old Grid Base)</span>
             <span class="val" id="outOld" style="color: #d35400;"></span>
+            <small style="color:#888;">This is your 2023-2024 table rate for Step <span id="stepLabel"></span>.</small>
         </div>
 
         <div class="card card-retro">
@@ -104,7 +105,7 @@ function calculate() {
     const fmt = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
     const dateFmt = { month: 'short', day: 'numeric', year: 'numeric' };
 
-    // Find step at hire to calculate monthly history
+    // Find starting step at hire date
     let yearsSinceHireAtToday = today.getFullYear() - hireDate.getFullYear();
     if (today.getMonth() < hireDate.getMonth() || (today.getMonth() === hireDate.getMonth() && today.getDate() < hireDate.getDate())) yearsSinceHireAtToday--;
     const startStep = Math.max(3, currentStepInput - yearsSinceHireAtToday);
@@ -115,66 +116,59 @@ function calculate() {
         return Math.min(17, startStep + Math.max(0, y));
     }
 
-    // 1. Month-by-Month Retro Audit (Hire -> June 30, 2026)
+    // 1. Month-by-Month Retro Calculation
     let totalRetro = 0;
-    let tempDate = new Date(hireDate);
-    while (tempDate <= retroEnd) {
-        let stepAtDate = getStepAtDate(tempDate);
-        let contractYearIdx = 0;
+    let auditDate = new Date(hireDate);
+    while (auditDate <= retroEnd) {
+        let stepAtDate = getStepAtDate(auditDate);
+        let contractIdx = 0;
         
-        if (tempDate >= new Date("2024-07-01") && tempDate < new Date("2025-07-01")) contractYearIdx = 1;
-        else if (tempDate >= new Date("2025-07-01")) contractYearIdx = 2;
+        if (auditDate >= new Date("2024-07-01") && auditDate < new Date("2025-07-01")) contractIdx = 1;
+        else if (auditDate >= new Date("2025-07-01")) contractIdx = 2;
         
-        if (contractYearIdx > 0) {
+        if (contractIdx > 0) {
             let oldMonthly = grid[stepAtDate][0] / 12;
-            let newMonthly = grid[stepAtDate][contractYearIdx] / 12;
+            let newMonthly = grid[stepAtDate][contractIdx] / 12;
             totalRetro += (newMonthly - oldMonthly);
         }
-        tempDate.setMonth(tempDate.getMonth() + 1);
+        auditDate.setMonth(auditDate.getMonth() + 1);
     }
 
-    // 2. Trajectory Table: Chronological progression
-    let nowStep = getStepAtDate(today);
-    let events = [{ date: today, label: "Current (Ratified)", step: nowStep, idx: 2 }];
-
-    // Milestones through 2027
-    const fixedDates = [
-        { d: "2026-07-01", idx: 3 },
-        { d: "2027-07-01", idx: 4 }
-    ];
-
+    // 2. Trajectory Generation (Chronological)
+    let milestones = [{ date: today, type: "Current (Ratified)", step: currentStepInput, idx: 2 }];
+    
+    // Anniversary and July 1 Events
+    const raises = [{ d: "2026-07-01", i: 3 }, { d: "2027-07-01", i: 4 }];
     for (let yr = 2026; yr <= 2027; yr++) {
         let anniv = new Date(hireDate);
         anniv.setFullYear(yr);
-        events.push({ date: anniv, label: "Anniversary Step", step: getStepAtDate(anniv), isStep: true });
+        milestones.push({ date: anniv, type: "Step Increase", step: getStepAtDate(anniv), isStep: true });
     }
-
-    fixedDates.forEach(fd => {
-        let d = new Date(fd.d + "T00:00:00");
-        events.push({ date: d, label: "Economic Increase", step: getStepAtDate(d), idx: fd.idx });
+    raises.forEach(r => {
+        let d = new Date(r.d + "T00:00:00");
+        milestones.push({ date: d, type: "Economic Increase", step: getStepAtDate(d), idx: r.i });
     });
 
-    events.sort((a, b) => a.date - b.date);
+    milestones.sort((a, b) => a.date - b.date);
 
     let tableHTML = "";
-    events.forEach(e => {
-        if (e.date < today && e.label !== "Current (Ratified)") return;
-        
-        let sIdx = e.idx;
+    milestones.forEach(m => {
+        if (m.date < today && m.type !== "Current (Ratified)") return;
+        let sIdx = m.idx;
         if (!sIdx) {
-            if (e.date < new Date("2026-07-01")) sIdx = 2;
-            else if (e.date < new Date("2027-07-01")) sIdx = 3;
+            if (m.date < new Date("2026-07-01")) sIdx = 2;
+            else if (m.date < new Date("2027-07-01")) sIdx = 3;
             else sIdx = 4;
         }
-
-        tableHTML += `<tr class="${e.isStep ? 'anniversary' : ''}">
-            <td>${e.date.toLocaleDateString('en-CA', dateFmt)}</td>
-            <td>Step ${e.step} (${e.label})</td>
-            <td>${fmt.format(grid[e.step][sIdx])}</td>
+        tableHTML += `<tr class="${m.isStep ? 'anniversary' : ''}">
+            <td>${m.date.toLocaleDateString('en-CA', dateFmt)}</td>
+            <td>Step ${m.step} (${m.type})</td>
+            <td>${fmt.format(grid[m.step][sIdx])}</td>
         </tr>`;
     });
 
-    document.getElementById('outOld').innerText = fmt.format(grid[nowStep][0]);
+    document.getElementById('outOld').innerText = fmt.format(grid[currentStepInput][0]);
+    document.getElementById('stepLabel').innerText = currentStepInput;
     document.getElementById('outRetro').innerText = fmt.format(totalRetro);
     document.getElementById('outTable').innerHTML = tableHTML;
     document.getElementById('results').style.display = "block";
