@@ -115,7 +115,7 @@ function calculate() {
     const fmt = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
     const dateFmt = { month: 'short', day: 'numeric', year: 'numeric' };
 
-    // Find starting step at hire date
+    // Find step at hire time
     let yearsSinceHireAtToday = today.getFullYear() - hireDate.getFullYear();
     if (today.getMonth() < hireDate.getMonth() || (today.getMonth() === hireDate.getMonth() && today.getDate() < hireDate.getDate())) yearsSinceHireAtToday--;
     const startStep = Math.max(3, cStepIn - yearsSinceHireAtToday);
@@ -126,16 +126,18 @@ function calculate() {
         return Math.min(17, startStep + Math.max(0, y));
     }
 
-    // Surgical Retro loop: Only calculates for months AFTER hireDate
+    // Linear monthly retro audit
     function getRetroForWindow(start, end) {
         let total = 0;
         let audit = new Date(start);
+        audit.setDate(1); // Standardize to 1st of month to prevent date overflow
+        
         while (audit <= end) {
-            // Check YYYY-MM to avoid precision issues
-            const auditYM = audit.getFullYear() * 12 + audit.getMonth();
-            const hireYM = hireDate.getFullYear() * 12 + hireDate.getMonth();
+            // Only add if audit month is same or after hire month/year
+            const auditVal = audit.getFullYear() * 12 + audit.getMonth();
+            const hireVal = hireDate.getFullYear() * 12 + hireDate.getMonth();
             
-            if (auditYM >= hireYM) {
+            if (auditVal >= hireVal) {
                 let step = getStepAtDate(audit);
                 let col = 0;
                 if (audit >= new Date("2024-07-01") && audit < new Date("2025-07-01")) col = 1;
@@ -155,10 +157,8 @@ function calculate() {
     const totalRetro = retro2024 + retro2025;
 
     let tableHTML = "";
-    // Row 1: Shows 2024 Increase Period
-    tableHTML += `<tr class="highlight"><td>July 1, 2024</td><td>2024 Increase (3%)</td><td>Step ${getStepAtDate(new Date("2024-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2024-07-01"))][1])}</td><td class="retro-cell">${fmt.format(retro2024)}</td></tr>`;
-    // Row 2: Shows 2025 Increase Period
-    tableHTML += `<tr class="highlight"><td>July 1, 2025</td><td>2025 Increase (3%)</td><td>Step ${getStepAtDate(new Date("2025-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2025-07-01"))][2])}</td><td class="retro-cell">${fmt.format(retro2025)}</td></tr>`;
+    tableHTML += `<tr class="highlight"><td>July 1, 2024</td><td>2024 Increase Period</td><td>Step ${getStepAtDate(new Date("2024-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2024-07-01"))][1])}</td><td class="retro-cell">${fmt.format(retro2024)}</td></tr>`;
+    tableHTML += `<tr class="highlight"><td>July 1, 2025</td><td>2025 Increase Period</td><td>Step ${getStepAtDate(new Date("2025-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2025-07-01"))][2])}</td><td class="retro-cell">${fmt.format(retro2025)}</td></tr>`;
     
     const futureEvents = [
         { d: "2026-07-01", type: "2026 Increase (3%)", idx: 3 },
@@ -167,4 +167,23 @@ function calculate() {
     for (let yr = 2026; yr <= 2027; yr++) {
         let anniv = new Date(hireDate);
         anniv.setFullYear(yr);
-        futureEvents.push({ d: anniv.toISOString().split('T')[0], type:
+        futureEvents.push({ d: anniv.toISOString().split('T')[0], type: "Anniversary Step", isStep: true });
+    }
+    futureEvents.sort((a, b) => new Date(a.d) - new Date(b.d));
+    
+    futureEvents.forEach(e => {
+        let eDate = new Date(e.d + "T00:00:00");
+        let step = getStepAtDate(eDate);
+        let sIdx = e.idx || (eDate < new Date("2026-07-01") ? 2 : (eDate < new Date("2027-07-01") ? 3 : 4));
+        tableHTML += `<tr><td>${eDate.toLocaleDateString('en-CA', dateFmt)}</td><td>${e.type}</td><td>Step ${step}</td><td>${fmt.format(grid[step][sIdx])}</td><td>--</td></tr>`;
+    });
+
+    document.getElementById('outOld').innerText = fmt.format(grid[getStepAtDate(today)][0]);
+    document.getElementById('outRetro').innerText = fmt.format(totalRetro);
+    document.getElementById('outTable').innerHTML = tableHTML;
+    document.getElementById('results').style.display = "block";
+}
+</script>
+
+</body>
+</html>
