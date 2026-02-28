@@ -7,7 +7,7 @@
     <style>
         :root { --blue: #004a99; --light: #e7f3ff; --success: #28a745; --text: #333; --warn: #f39c12; }
         body { font-family: -apple-system, sans-serif; background: #f0f4f8; color: var(--text); padding: 15px; margin: 0; }
-        .container { max-width: 550px; margin: 20px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        .container { max-width: 550px; margin: 20px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h1 { color: var(--blue); text-align: center; font-size: 22px; margin-bottom: 5px; }
         .sub { text-align: center; color: #777; font-size: 13px; margin-bottom: 25px; }
         label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 14px; color: var(--blue); }
@@ -23,12 +23,8 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
         th { background: var(--light); color: var(--blue); }
+        tr.anniversary { background-color: #f9f9f9; font-weight: 600; }
         .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #555; font-style: italic; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; position: relative; max-width: 90%; width: 500px; text-align: center; }
-        .close-btn { position: absolute; top: 5px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; color: #333; z-index: 1001; }
-        .modal-img { width: 100%; border-radius: 8px; margin-top: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -53,7 +49,7 @@
         <option value="17">Step 17</option>
     </select>
 
-    <button onclick="calculate()">Run Payout Analysis</button>
+    <button onclick="calculate()">Analyze My Pay & Retro</button>
 
     <div id="results" class="results">
         <div class="card card-verify">
@@ -62,27 +58,19 @@
         </div>
 
         <div class="card card-retro">
-            <span class="tag">Estimated Gross Retro Payout</span>
+            <span class="tag">Estimated Retro Payout (By June 30, 2026)</span>
             <span class="val" id="outRetro" style="color: var(--success);"></span>
         </div>
 
-        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">Career Anniversary Trajectory</h3>
+        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">Future Growth Trajectory</h3>
         <table>
-            <thead><tr><th>Effective Date</th><th>Step</th><th>Annual Salary</th></tr></thead>
+            <thead><tr><th>Effective Date</th><th>Event</th><th>Step</th><th>Annual Salary</th></tr></thead>
             <tbody id="outTable"></tbody>
         </table>
     </div>
 
     <div class="footer">
         Brought to you by Russell... You're welcome.
-    </div>
-</div>
-
-<div id="modalOverlay" class="modal-overlay">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        <h2 style="color: var(--blue); margin: 0 0 10px 0; font-size: 18px;">Janke Jorts!</h2>
-        <img src="Chris.jpg" class="modal-img" alt="Contract Logic Flowchart">
     </div>
 </div>
 
@@ -108,16 +96,18 @@ const grid = {
 function calculate() {
     const currentStepInput = parseInt(document.getElementById('currStep').value);
     const hStr = document.getElementById('hireDate').value;
-    if (!currentStepInput || !hStr) return alert("Please select your hire date and current step.");
+    if (!currentStepInput || !hStr) return alert("Please fill in both fields.");
 
     const hireDate = new Date(hStr + "T00:00:00");
-    const today = new Date("2026-02-27T00:00:00");
+    const today = new Date();
+    const retroEndDate = new Date("2026-06-30T23:59:59");
     const fmt = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
-    const dateFmt = { month: 'long', day: 'numeric', year: 'numeric' };
+    const dateFmt = { month: 'short', day: 'numeric', year: 'numeric' };
 
-    let yearsSinceHire = today.getFullYear() - hireDate.getFullYear();
-    if (today.getMonth() < hireDate.getMonth() || (today.getMonth() === hireDate.getMonth() && today.getDate() < hireDate.getDate())) yearsSinceHire--;
-    const startStep = Math.max(3, currentStepInput - yearsSinceHire);
+    // 1. Calculate the actual start step at time of hire
+    let yearsSinceHireAtToday = today.getFullYear() - hireDate.getFullYear();
+    if (today.getMonth() < hireDate.getMonth() || (today.getMonth() === hireDate.getMonth() && today.getDate() < hireDate.getDate())) yearsSinceHireAtToday--;
+    const startStep = Math.max(3, currentStepInput - yearsSinceHireAtToday);
 
     function getStepAtDate(d) {
         let y = d.getFullYear() - hireDate.getFullYear();
@@ -125,38 +115,79 @@ function calculate() {
         return Math.min(17, startStep + Math.max(0, y));
     }
 
+    // 2. Retro Calculation (Hire to June 30, 2026)
     let totalRetro = 0;
     let tempDate = new Date(hireDate);
-    while (tempDate <= today) {
+    while (tempDate <= retroEndDate) {
         let stepAtDate = getStepAtDate(tempDate);
         let contractYearIndex = 0;
+        
         if (tempDate >= new Date("2024-07-01") && tempDate < new Date("2025-07-01")) contractYearIndex = 1;
-        else if (tempDate >= new Date("2025-07-01")) contractYearIndex = 2;
+        else if (tempDate >= new Date("2025-07-01") && tempDate <= retroEndDate) contractYearIndex = 2;
+        
         if (contractYearIndex > 0) {
-            totalRetro += (grid[stepAtDate][contractYearIndex] / 12) - (grid[stepAtDate][0] / 12);
+            let paidMonthly = grid[stepAtDate][0] / 12;
+            let shouldMonthly = grid[stepAtDate][contractYearIndex] / 12;
+            totalRetro += (shouldMonthly - paidMonthly);
         }
         tempDate.setMonth(tempDate.getMonth() + 1);
     }
 
-    let tableHTML = `<tr><td><strong>Current (Ratified)</strong></td><td>Step ${currentStepInput}</td><td>${fmt.format(grid[currentStepInput][2])}</td></tr>`;
-    for (let i = 1; i <= 3; i++) {
-        let nextAnniv = new Date(hireDate);
-        nextAnniv.setFullYear(today.getFullYear() + (today.getMonth() >= hireDate.getMonth() ? i : i - 1));
-        if (nextAnniv <= today) continue;
-        let nextStep = Math.min(17, currentStepInput + i);
-        let yr = nextAnniv >= new Date("2027-07-01") ? 4 : 3;
-        tableHTML += `<tr><td>${nextAnniv.toLocaleDateString('en-CA', dateFmt)}</td><td>Step ${nextStep}</td><td>${fmt.format(grid[nextStep][yr])}</td></tr>`;
+    // 3. Trajectory Table: Chronological Anniversary and July 1st logic
+    let timeline = [];
+    let nowStep = getStepAtDate(today);
+
+    // Initial State (Ratified Today)
+    timeline.push({ date: today, event: "Current (Ratified)", step: nowStep, index: 2 });
+
+    // Identify Events through 2028
+    const eventDates = [
+        { d: "2026-07-01", type: "Economic (3%)", idx: 3 },
+        { d: "2027-07-01", type: "Economic (3%)", idx: 4 }
+    ];
+
+    // Add Anniversaries
+    for (let yr = 2026; yr <= 2028; yr++) {
+        let anniv = new Date(hireDate);
+        anniv.setFullYear(yr);
+        timeline.push({ date: anniv, event: "Step Increase", step: getStepAtDate(anniv), anniversary: true });
     }
 
-    document.getElementById('outOld').innerText = fmt.format(grid[currentStepInput][0]);
+    // Add Economic Increases
+    eventDates.forEach(ed => {
+        let d = new Date(ed.d + "T00:00:00");
+        timeline.push({ date: d, event: ed.type, step: getStepAtDate(d), index: ed.idx });
+    });
+
+    // Sort Chronologically
+    timeline.sort((a, b) => a.date - b.date);
+
+    let tableHTML = "";
+    timeline.forEach(t => {
+        if (t.date < today && t.event !== "Current (Ratified)") return;
+        
+        // Find correct salary index for anniversaries
+        let salaryIdx = t.index;
+        if (!salaryIdx) {
+            if (t.date < new Date("2026-07-01")) salaryIdx = 2;
+            else if (t.date < new Date("2027-07-01")) salaryIdx = 3;
+            else salaryIdx = 4;
+        }
+
+        tableHTML += `<tr class="${t.anniversary ? 'anniversary' : ''}">
+            <td>${t.date.toLocaleDateString('en-CA', dateFmt)}</td>
+            <td>${t.event}</td>
+            <td>Step ${t.step}</td>
+            <td>${fmt.format(grid[t.step][salaryIdx])}</td>
+        </tr>`;
+    });
+
+    document.getElementById('outOld').innerText = fmt.format(grid[nowStep][0]);
     document.getElementById('outRetro').innerText = fmt.format(totalRetro);
     document.getElementById('outTable').innerHTML = tableHTML;
     document.getElementById('results').style.display = "block";
-
-    setTimeout(() => { document.getElementById('modalOverlay').style.display = 'flex'; }, 3000);
 }
-
-function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
 </script>
+
 </body>
 </html>
