@@ -11,11 +11,10 @@
         h1 { color: var(--blue); text-align: center; font-size: 22px; margin-bottom: 5px; }
         .sub { text-align: center; color: #777; font-size: 13px; margin-bottom: 25px; }
         label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 14px; color: var(--blue); }
-        input, select { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 20px; transition: border 0.2s; }
-        input:focus, select:focus { border-color: var(--blue); outline: none; }
+        input, select { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 20px; }
         button { width: 100%; background: var(--blue); color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 700; cursor: pointer; }
         button:hover { background: #003366; }
-        .results { display: none; margin-top: 25px; border-top: 2px solid #eee; padding-top: 20px; animation: fadeIn 0.4s ease-in; }
+        .results { display: none; margin-top: 25px; border-top: 2px solid #eee; padding-top: 20px; }
         .card { padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center; border: 1px solid #ddd; }
         .card-verify { background: #fff8e1; border-color: #ffe082; }
         .card-retro { background: #e8f5e9; border-color: #a5d6a7; }
@@ -27,7 +26,6 @@
         tr.highlight { background-color: #fcfcfc; font-weight: 600; border-left: 4px solid var(--success); }
         .retro-cell { color: var(--success); font-weight: bold; }
         .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #555; font-style: italic; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -36,11 +34,11 @@
     <h1>NASA Salary Analyst</h1>
     <p class="sub">Precision 2024-2028 Financial Dashboard</p>
     
-    <label>Date of Hire (Anniversary Date)</label>
-    <input type="date" id="hireDate" oninput="calculate(true)">
+    <label>Hire Date (Anniversary Date)</label>
+    <input type="date" id="hireDate">
 
     <label>Current Step</label>
-    <select id="currStep" onchange="calculate(true)">
+    <select id="currStep">
         <option value="" disabled selected>Select your current step...</option>
         <option value="3">Step 3</option><option value="4">Step 4</option>
         <option value="5">Step 5</option><option value="6">Step 6</option>
@@ -52,7 +50,7 @@
         <option value="17">Step 17</option>
     </select>
 
-    <button onclick="calculate(false)">Run Manual Audit</button>
+    <button onclick="calculate()">Run Financial Audit</button>
 
     <div id="results" class="results">
         <div class="card card-verify">
@@ -106,14 +104,10 @@ const grid = {
     17: [114019, 117439.57, 120962.76, 124591.64, 128329.39]
 };
 
-function calculate(isAuto) {
+function calculate() {
     const cStepIn = parseInt(document.getElementById('currStep').value);
     const hStr = document.getElementById('hireDate').value;
-    
-    if (!cStepIn || !hStr) {
-        if (!isAuto) alert("Select hire date and current step.");
-        return;
-    }
+    if (!cStepIn || !hStr) return alert("Select hire date and current step.");
 
     const hireDate = new Date(hStr + "T00:00:00");
     const today = new Date();
@@ -135,6 +129,12 @@ function calculate(isAuto) {
         let total = 0;
         let audit = new Date(start);
         while (audit <= end) {
+            // CRITICAL GATEKEEPER: Don't calculate retro for months before hire
+            if (audit < hireDate) {
+                audit.setMonth(audit.getMonth() + 1);
+                continue;
+            }
+            
             let step = getStepAtDate(audit);
             let col = 0;
             if (audit >= new Date("2024-07-01") && audit < new Date("2025-07-01")) col = 1;
@@ -148,7 +148,7 @@ function calculate(isAuto) {
         return total;
     }
 
-    const retro2024 = getRetroForWindow(hireDate, new Date("2025-06-30"));
+    const retro2024 = getRetroForWindow(new Date("2024-07-01"), new Date("2025-06-30"));
     const retro2025 = getRetroForWindow(new Date("2025-07-01"), retroEnd);
     const totalRetro = retro2024 + retro2025;
 
