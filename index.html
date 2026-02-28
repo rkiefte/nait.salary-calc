@@ -3,129 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NASA/NAIT Official Salary Analyst</title>
+    <title>NASA Salary & Retro Analyst</title>
     <style>
         :root { --blue: #004a99; --light: #e7f3ff; --success: #28a745; --text: #333; --warn: #f39c12; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f7f9; color: var(--text); padding: 20px; line-height: 1.5; }
-        .card { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h1 { color: var(--blue); text-align: center; margin-bottom: 5px; font-size: 24px; }
-        .subtitle { text-align: center; color: #777; font-size: 14px; margin-bottom: 25px; }
-        .field { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        button { width: 100%; background: var(--blue); color: #fff; border: none; padding: 15px; border-radius: 8px; font-size: 18px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        body { font-family: -apple-system, sans-serif; background: #f0f4f8; color: var(--text); padding: 15px; margin: 0; }
+        .container { max-width: 550px; margin: 20px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: var(--blue); text-align: center; font-size: 22px; margin-bottom: 5px; }
+        .sub { text-align: center; color: #777; font-size: 13px; margin-bottom: 25px; }
+        label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 14px; color: var(--blue); }
+        input, select { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 20px; }
+        button { width: 100%; background: var(--blue); color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 700; cursor: pointer; }
         button:hover { background: #003366; }
-        .results { display: none; margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; animation: fadeIn 0.4s; }
-        .box { padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center; }
-        .box-warn { background: #fff3e0; border: 1px solid var(--warn); }
-        .box-success { background: #e8f5e9; border: 1px solid var(--success); }
-        .label { font-size: 11px; text-transform: uppercase; color: #666; font-weight: 700; display: block; }
-        .val { font-size: 22px; font-weight: 800; color: var(--blue); }
+        .results { display: none; margin-top: 25px; border-top: 2px solid #eee; padding-top: 20px; }
+        .card { padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center; border: 1px solid #ddd; }
+        .card-verify { background: #fff8e1; border-color: #ffe082; }
+        .card-retro { background: #e8f5e9; border-color: #a5d6a7; }
+        .tag { font-size: 10px; text-transform: uppercase; color: #777; font-weight: 800; display: block; margin-bottom: 4px; }
+        .val { font-size: 24px; font-weight: 800; color: var(--blue); }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
         th { background: var(--light); color: var(--blue); }
-        .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #aaa; }
     </style>
 </head>
 <body>
 
-<div class="card">
+<div class="container">
     <h1>NASA Salary Analyst</h1>
-    <p class="subtitle">Official 2024-2028 Ratified Logic</p>
+    <p class="sub">Verified 2024-2028 Payout Engine</p>
     
-    <div class="field">
-        <label>Hire Date (Anniversary Date)</label>
-        <input type="date" id="hDate">
-    </div>
+    <label>Date of Hire</label>
+    <input type="date" id="hireDate">
 
-    <div class="field">
-        <label>Step at Hire</label>
-        <select id="hStep">
-            <option value="" disabled selected>Select starting step...</option>
-            <option value="3">Step 3</option><option value="4">Step 4</option>
-            <option value="5">Step 5</option><option value="6">Step 6</option>
-            <option value="7">Step 7</option><option value="8">Step 8</option>
-            <option value="9">Step 9</option><option value="10">Step 10</option>
-            <option value="11">Step 11</option><option value="12">Step 12</option>
-            <option value="13">Step 13</option><option value="14">Step 14</option>
-            <option value="15">Step 15</option><option value="16">Step 16</option>
-            <option value="17">Step 17</option>
-        </select>
-    </div>
+    <label>Starting Step</label>
+    <select id="hireStep">
+        <option value="" disabled selected>Choose Step...</option>
+        <option value="3">Step 3</option><option value="4">Step 4</option>
+        <option value="5">Step 5</option><option value="6">Step 6</option>
+        <option value="7">Step 7</option><option value="8">Step 8</option>
+        <option value="9">Step 9</option><option value="10">Step 10</option>
+        <option value="11">Step 11</option><option value="12">Step 12</option>
+        <option value="13">Step 13</option><option value="14">Step 14</option>
+        <option value="15">Step 15</option><option value="16">Step 16</option>
+        <option value="17">Step 17</option>
+    </select>
 
-    <button onclick="run()">Calculate Payout & Outlook</button>
+    <button onclick="calculate()">Run Payout Analysis</button>
 
-    <div id="res" class="results">
-        <div class="box box-warn">
-            <span class="label">Current Pay Stub Verification (Annual Base)</span>
-            <span class="val" id="vOld" style="color:#e67e22"></span>
+    <div id="results" class="results">
+        <div class="card card-verify">
+            <span class="tag">Verify Current Pay Stub (Gross Annual)</span>
+            <span class="val" id="outOld" style="color: #d35400;"></span>
         </div>
 
-        <div class="box box-success">
-            <span class="label">Estimated Gross Retro Payout</span>
-            <span class="val" id="vRetro" style="color:var(--success)"></span>
+        <div class="card card-retro">
+            <span class="tag">Estimated Gross Retro Payout</span>
+            <span class="val" id="outRetro" style="color: var(--success);"></span>
         </div>
 
-        <h3 style="font-size:16px; color:var(--blue); margin:20px 0 10px;">5-Year Career Trajectory</h3>
+        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">5-Year Trajectory</h3>
         <table>
-            <thead><tr><th>Date</th><th>Step</th><th>Annual Salary</th></tr></thead>
-            <tbody id="vTable"></tbody>
+            <thead><tr><th>Date</th><th>Step</th><th>New Salary</th></tr></thead>
+            <tbody id="outTable"></tbody>
         </table>
     </div>
 
     <div class="footer">
-        Strategic Business Analytics by <strong>Arkay Builders & Consulting</strong><br>
-        <em>Alberta's Precision Garage Specialist</em>
+        Provided by <strong>Arkay Builders & Consulting</strong><br>
+        <em>Alberta Garage Specialists</em>
     </div>
 </div>
 
 <script>
-const g = {
-    3:[65544, 67510.32, 69535.63, 71621.70, 73770.35],
-    4:[69007, 71077.21, 73209.53, 75405.81, 77667.99],
-    5:[72469, 74643.07, 76882.36, 79188.83, 81564.50],
-    6:[75931, 78208.93, 80555.20, 82971.85, 85461.01],
-    7:[79393, 81774.79, 84228.03, 86754.87, 89357.52],
-    8:[82856, 85341.68, 87901.93, 90538.99, 93255.16],
-    9:[86319, 88908.57, 91575.83, 94323.10, 97152.79],
-    10:[89781, 92474.43, 95248.66, 98106.12, 101049.31],
-    11:[93244, 96041.32, 98922.56, 101890.24, 104946.94],
-    12:[96706, 99607.18, 102595.40, 105673.26, 108843.45],
-    13:[100169, 103174.07, 106269.29, 109457.37, 112741.09],
-    14:[103632, 106740.96, 109943.19, 113241.48, 116638.73],
-    15:[107094, 110306.82, 113616.02, 117024.51, 120535.24],
-    16:[110557, 113873.71, 117289.92, 120808.62, 124432.88],
-    17:[114019, 117439.57, 120962.76, 124591.64, 128329.39]
+const grid = {
+    3: [65544, 67510.32, 69535.63, 71621.70, 73770.35],
+    4: [69007, 71077.21, 73209.53, 75405.81, 77667.99],
+    5: [72469, 74643.07, 76882.36, 79188.83, 81564.50],
+    6: [75931, 78208.93, 80555.20, 82971.85, 85461.01],
+    7: [79393, 81774.79, 84228.03, 86754.87, 89357.52],
+    8: [82856, 85341.68, 87901.93, 90538.99, 93255.16],
+    9: [86319, 88908.57, 91575.83, 94323.10, 97152.79],
+    10: [89781, 92474.43, 95248.66, 98106.12, 101049.31],
+    11: [93244, 96041.32, 98922.56, 101890.24, 104946.94],
+    12: [96706, 99607.18, 102595.40, 105673.26, 108843.45],
+    13: [100169, 103174.07, 106269.29, 109457.37, 112741.09],
+    14: [103632, 106740.96, 109943.19, 113241.48, 116638.73],
+    15: [107094, 110306.82, 113616.02, 117024.51, 120535.24],
+    16: [110557, 113873.71, 117289.92, 120808.62, 124432.88],
+    17: [114019, 117439.57, 120962.76, 124591.64, 128329.39]
 };
 
-function run() {
-    const sStep = parseInt(document.getElementById('hStep').value);
-    const hStr = document.getElementById('hDate').value;
-    if (!sStep || !hStr) return alert("Enter hire date and step.");
-    
-    const hDate = new Date(hStr);
-    const now = new Date();
-    const f = new Intl.NumberFormat('en-CA', { style:'currency', currency:'CAD' });
+function calculate() {
+    const sStep = parseInt(document.getElementById('hireStep').value);
+    const hStr = document.getElementById('hireDate').value;
+    if (!sStep || !hStr) return alert("Please select your hire date and starting step.");
 
-    function getStep(d) {
-        let y = d.getFullYear() - hDate.getFullYear();
-        if (d.getMonth() < hDate.getMonth() || (d.getMonth() === hDate.getMonth() && d.getDate() < hDate.getDate())) y--;
+    const hireDate = new Date(hStr + "T00:00:00");
+    const today = new Date("2026-02-27T00:00:00");
+    const fmt = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
+
+    function getStepAt(d) {
+        let y = d.getFullYear() - hireDate.getFullYear();
+        if (d.getMonth() < hireDate.getMonth() || (d.getMonth() === hireDate.getMonth() && d.getDate() < hireDate.getDate())) y--;
         return Math.min(17, sStep + Math.max(0, y));
     }
 
-    const cStep = getStep(now);
-    const oldVal = g[cStep][0];
-    
-    // Retro math: Difference between what was paid and should have been paid
-    // Year 1 (July 24 - June 25): User in hire step.
-    const d24 = (g[sStep][1] - g[sStep][0]) / 12 * 9; 
-    // Year 2 (July 25 - Now): User in current step.
-    const d25 = (g[cStep][2] - g[cStep][0]) / 12 * 8;
-    const retro = d24 + d25;
+    // 1. Retro Logic: Monthly Audit
+    let totalRetro = 0;
+    let tempDate = new Date(hireDate);
+    while (tempDate <= today) {
+        let currentStep = getStepAt(tempDate);
+        let yearIndex = 0; // Old Paid Rate
+        let contractYearIndex = 0; // What SHOULD have been paid
+        
+        // Determine Contract Period
+        if (tempDate >= new Date("2024-07-01") && tempDate < new Date("2025-07-01")) contractYearIndex = 1;
+        else if (tempDate >= new Date("2025-07-01")) contractYearIndex = 2;
+        
+        if (contractYearIndex > 0) {
+            let paidMonthly = grid[currentStep][0] / 12;
+            let shouldMonthly = grid[currentStep][contractYearIndex] / 12;
+            totalRetro += (shouldMonthly - paidMonthly);
+        }
+        tempDate.setMonth(tempDate.getMonth() + 1);
+    }
 
-    // Timeline Projection
-    let h = "";
+    // 2. Projections
+    let nowStep = getStepAt(today);
+    let tableHTML = "";
     const timeline = [
-        { l: "Current (Ratified)", s: cStep, i: 2 },
-        { l: "July 1, 2026", s: cStep, i:
+        { l: "Current (Ratified)", s: nowStep, i: 2 },
+        { l: "July 1, 2026", s: nowStep, i: 3 },
+        { l: "Next Anniversary", s: Math.min(17, nowStep + 1), i: 3 },
+        { l: "July 1, 2027", s: Math.min(17, nowStep + 1), i: 4 }
+    ];
+    timeline.forEach(t => {
+        tableHTML += `<tr><td>${t.l}</td><td>Step ${t.s}</td><td>${fmt.format(grid[t.s][t.i])}</td></tr>`;
+    });
+
+    document.getElementById('outOld').innerText = fmt.format(grid[nowStep][0]);
+    document.getElementById('outRetro').innerText = fmt.format(totalRetro);
+    document.getElementById('outTable').innerHTML = tableHTML;
+    document.getElementById('results').style.display = "block";
+}
+</script>
+
+</body>
+</html>
