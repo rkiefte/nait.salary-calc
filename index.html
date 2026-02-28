@@ -62,7 +62,7 @@
         <div class="card card-retro">
             <span class="tag">Total Estimated Retro Payout</span>
             <span class="val" id="outRetro" style="color: var(--success);"></span>
-            <small style="color:#888;">Calculated through June 30, 2026.</small>
+            <small style="color:#888;">Calculated strictly from Hire Date through June 30, 2026.</small>
         </div>
 
         <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">Salary Trajectory & Retro Breakdown</h3>
@@ -125,23 +125,21 @@ function calculate() {
         return Math.min(17, startStep + Math.max(0, y));
     }
 
+    // UPDATED: Retro loop strictly respects hire date
     function getRetroForWindow(start, end) {
         let total = 0;
         let audit = new Date(start);
         while (audit <= end) {
-            // CRITICAL GATEKEEPER: Don't calculate retro for months before hire
-            if (audit < hireDate) {
-                audit.setMonth(audit.getMonth() + 1);
-                continue;
-            }
-            
-            let step = getStepAtDate(audit);
-            let col = 0;
-            if (audit >= new Date("2024-07-01") && audit < new Date("2025-07-01")) col = 1;
-            else if (audit >= new Date("2025-07-01")) col = 2;
-            
-            if (col > 0) {
-                total += (grid[step][col] / 12) - (grid[step][0] / 12);
+            // THE GATEKEEPER: If audit date is before actual hire date, ignore.
+            if (audit >= hireDate) {
+                let step = getStepAtDate(audit);
+                let col = 0;
+                if (audit >= new Date("2024-07-01") && audit < new Date("2025-07-01")) col = 1;
+                else if (audit >= new Date("2025-07-01")) col = 2;
+                
+                if (col > 0) {
+                    total += (grid[step][col] / 12) - (grid[step][0] / 12);
+                }
             }
             audit.setMonth(audit.getMonth() + 1);
         }
