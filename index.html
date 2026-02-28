@@ -32,9 +32,9 @@
 
 <div class="container">
     <h1>NASA Salary Analyst</h1>
-    <p class="sub">Verified "Year-over-Year" Financial Audit</p>
+    <p class="sub">Personalized "Hire-to-June" Financial Audit</p>
     
-    <label>Hire Date (Anniversary Date)</label>
+    <label>Hire Date (Anniversary)</label>
     <input type="date" id="hireDate">
 
     <label>Current Step</label>
@@ -56,24 +56,24 @@
         <div class="card card-verify">
             <span class="tag">Verify Current Pay Stub (Old 2023 Grid)</span>
             <span class="val" id="outOld" style="color: #d35400;"></span>
-            <small style="color:#888;">Raw table rate for your current step.</small>
+            <small style="color:#888;">This is your current baseline salary.</small>
         </div>
 
         <div class="card card-retro">
             <span class="tag">Total Estimated Retro Payout</span>
             <span class="val" id="outRetro" style="color: var(--success);"></span>
-            <small style="color:#888;">Total lump sum for all periods.</small>
+            <small style="color:#888;">Lump sum total through June 30, 2026.</small>
         </div>
 
-        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">Retro Breakdown & Future Trajectory</h3>
+        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">Retro "Bucket" Breakdown</h3>
         <table>
             <thead>
                 <tr>
                     <th>Effective Date</th>
-                    <th>Event</th>
+                    <th>Comparison Period</th>
                     <th>Step</th>
                     <th>Salary</th>
-                    <th>Retro for Period</th>
+                    <th>Retro Earned</th>
                 </tr>
             </thead>
             <tbody id="outTable"></tbody>
@@ -107,7 +107,7 @@ const grid = {
 function calculate() {
     const cStepIn = parseInt(document.getElementById('currStep').value);
     const hStr = document.getElementById('hireDate').value;
-    if (!cStepIn || !hStr) return alert("Select hire date and step.");
+    if (!cStepIn || !hStr) return alert("Select hire date and current step.");
 
     const hireDate = new Date(hStr + "T00:00:00");
     const today = new Date();
@@ -125,47 +125,32 @@ function calculate() {
         return Math.min(17, startStep + Math.max(0, y));
     }
 
-    // Weekly Audit (Isolated Windows)
-    function getRetroForPeriod(startBound, endBound, contractCol) {
+    function getRetroForWindow(start, end, contractCol) {
         let total = 0;
-        let current = new Date(startBound);
+        let current = new Date(start);
         if (hireDate > current) current = new Date(hireDate);
         
-        while (current <= endBound && current <= retroEnd) {
+        while (current <= end && current <= retroEnd) {
             let step = getStepAtDate(current);
-            // Non-compounding: Always compare current year's rate to the 2023 baseline (Col 0)
             total += (grid[step][contractCol] - grid[step][0]) / 52;
             current.setDate(current.getDate() + 7);
         }
         return total;
     }
 
-    const retro2024 = getRetroForPeriod(new Date("2024-07-01"), new Date("2025-06-30"), 1);
-    const retro2025 = getRetroForPeriod(new Date("2025-07-01"), retroEnd, 2);
+    const retro24 = getRetroForWindow(new Date("2024-07-01"), new Date("2025-06-30"), 1);
+    const retro25 = getRetroForWindow(new Date("2025-07-01"), retroEnd, 2);
+
+    // Dynamic Effective Date Logic
+    let row1Date = new Date("2024-07-01");
+    if (hireDate > row1Date) row1Date = hireDate;
 
     let tableHTML = "";
-    tableHTML += `<tr class="highlight"><td>July 1, 2024</td><td>2024 Retro Window</td><td>Step ${getStepAtDate(new Date("2024-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2024-07-01"))][1])}</td><td class="retro-cell">${fmt.format(retro2024)}</td></tr>`;
-    tableHTML += `<tr class="highlight"><td>July 1, 2025</td><td>2025 Retro Window</td><td>Step ${getStepAtDate(new Date("2025-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2025-07-01"))][2])}</td><td class="retro-cell">${fmt.format(retro2025)}</td></tr>`;
-    
-    const future = [
-        { d: "2026-07-01", type: "2026 Increase (3%)", idx: 3 },
-        { d: "2027-07-01", type: "2027 Increase (3%)", idx: 4 }
-    ];
-    for (let yr = 2026; yr <= 2027; yr++) {
-        let anniv = new Date(hireDate); anniv.setFullYear(yr);
-        future.push({ d: anniv.toISOString().split('T')[0], type: "Anniversary Step", isStep: true });
-    }
-    future.sort((a, b) => new Date(a.d) - new Date(b.d));
-    
-    future.forEach(e => {
-        let eDate = new Date(e.d + "T00:00:00");
-        let step = getStepAtDate(eDate);
-        let sIdx = e.idx || (eDate < new Date("2026-07-01") ? 2 : (eDate < new Date("2027-07-01") ? 3 : 4));
-        tableHTML += `<tr><td>${eDate.toLocaleDateString('en-CA', dateFmt)}</td><td>${e.type}</td><td>Step ${step}</td><td>${fmt.format(grid[step][sIdx])}</td><td>--</td></tr>`;
-    });
+    tableHTML += `<tr class="highlight"><td>${row1Date.toLocaleDateString('en-CA', dateFmt)}</td><td>2024 Increase Period</td><td>Step ${getStepAtDate(row1Date)}</td><td>${fmt.format(grid[getStepAtDate(row1Date)][1])}</td><td class="retro-cell">${fmt.format(retro24)}</td></tr>`;
+    tableHTML += `<tr class="highlight"><td>July 1, 2025</td><td>2025 Increase Period</td><td>Step ${getStepAtDate(new Date("2025-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2025-07-01"))][2])}</td><td class="retro-cell">${fmt.format(retro25)}</td></tr>`;
 
     document.getElementById('outOld').innerText = fmt.format(grid[getStepAtDate(today)][0]);
-    document.getElementById('outRetro').innerText = fmt.format(retro2024 + retro2025);
+    document.getElementById('outRetro').innerText = fmt.format(retro24 + retro25);
     document.getElementById('outTable').innerHTML = tableHTML;
     document.getElementById('results').style.display = "block";
 }
