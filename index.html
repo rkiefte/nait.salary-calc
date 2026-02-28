@@ -7,7 +7,7 @@
     <style>
         :root { --blue: #004a99; --light: #e7f3ff; --success: #28a745; --text: #333; --warn: #f39c12; }
         body { font-family: -apple-system, sans-serif; background: #f0f4f8; color: var(--text); padding: 15px; margin: 0; }
-        .container { max-width: 650px; margin: 20px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 700px; margin: 20px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h1 { color: var(--blue); text-align: center; font-size: 22px; margin-bottom: 5px; }
         .sub { text-align: center; color: #777; font-size: 13px; margin-bottom: 25px; }
         label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 14px; color: var(--blue); }
@@ -23,7 +23,8 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
         th { background: var(--light); color: var(--blue); }
-        tr.highlight { background-color: #fcfcfc; font-weight: 600; border-left: 4px solid var(--success); }
+        tr.retro-row { background-color: #f6fff7; font-weight: 600; border-left: 4px solid var(--success); }
+        tr.future-row { border-left: 4px solid #ddd; }
         .retro-cell { color: var(--success); font-weight: bold; }
         .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #555; font-style: italic; }
     </style>
@@ -32,9 +33,9 @@
 
 <div class="container">
     <h1>NASA Salary Analyst</h1>
-    <p class="sub">Personalized "Hire-to-June" Financial Audit</p>
+    <p class="sub">Precision 2024-2028 Financial Audit</p>
     
-    <label>Hire Date (Anniversary)</label>
+    <label>Hire Date (Anniversary Date)</label>
     <input type="date" id="hireDate">
 
     <label>Current Step</label>
@@ -56,21 +57,21 @@
         <div class="card card-verify">
             <span class="tag">Verify Current Pay Stub (Old 2023 Grid)</span>
             <span class="val" id="outOld" style="color: #d35400;"></span>
-            <small style="color:#888;">This is your current baseline salary.</small>
+            <small style="color:#888;">Raw table rate for your current step.</small>
         </div>
 
         <div class="card card-retro">
             <span class="tag">Total Estimated Retro Payout</span>
             <span class="val" id="outRetro" style="color: var(--success);"></span>
-            <small style="color:#888;">Lump sum total through June 30, 2026.</small>
+            <small style="color:#888;">Cumulative lump sum through June 30, 2026.</small>
         </div>
 
-        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">Retro "Bucket" Breakdown</h3>
+        <h3 style="font-size: 16px; color: var(--blue); margin-bottom: 10px;">Full Trajectory & Retro Audit</h3>
         <table>
             <thead>
                 <tr>
                     <th>Effective Date</th>
-                    <th>Comparison Period</th>
+                    <th>Event</th>
                     <th>Step</th>
                     <th>Salary</th>
                     <th>Retro Earned</th>
@@ -125,6 +126,7 @@ function calculate() {
         return Math.min(17, startStep + Math.max(0, y));
     }
 
+    // Weekly Audit (Non-Compounding Windows)
     function getRetroForWindow(start, end, contractCol) {
         let total = 0;
         let current = new Date(start);
@@ -141,13 +143,36 @@ function calculate() {
     const retro24 = getRetroForWindow(new Date("2024-07-01"), new Date("2025-06-30"), 1);
     const retro25 = getRetroForWindow(new Date("2025-07-01"), retroEnd, 2);
 
-    // Dynamic Effective Date Logic
+    let tableHTML = "";
+    
+    // 1. HISTORICAL RETRO ROWS
     let row1Date = new Date("2024-07-01");
     if (hireDate > row1Date) row1Date = hireDate;
+    
+    tableHTML += `<tr class="retro-row"><td>${row1Date.toLocaleDateString('en-CA', dateFmt)}</td><td>2024 Increase Audit</td><td>Step ${getStepAtDate(row1Date)}</td><td>${fmt.format(grid[getStepAtDate(row1Date)][1])}</td><td class="retro-cell">${fmt.format(retro24)}</td></tr>`;
+    tableHTML += `<tr class="retro-row"><td>July 1, 2025</td><td>2025 Increase Audit</td><td>Step ${getStepAtDate(new Date("2025-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2025-07-01"))][2])}</td><td class="retro-cell">${fmt.format(retro25)}</td></tr>`;
 
-    let tableHTML = "";
-    tableHTML += `<tr class="highlight"><td>${row1Date.toLocaleDateString('en-CA', dateFmt)}</td><td>2024 Increase Period</td><td>Step ${getStepAtDate(row1Date)}</td><td>${fmt.format(grid[getStepAtDate(row1Date)][1])}</td><td class="retro-cell">${fmt.format(retro24)}</td></tr>`;
-    tableHTML += `<tr class="highlight"><td>July 1, 2025</td><td>2025 Increase Period</td><td>Step ${getStepAtDate(new Date("2025-07-01"))}</td><td>${fmt.format(grid[getStepAtDate(new Date("2025-07-01"))][2])}</td><td class="retro-cell">${fmt.format(retro25)}</td></tr>`;
+    // 2. FUTURE TRAJECTORY LOGIC
+    const events = [
+        { d: "2026-07-01", type: "Economic (3%)", idx: 3 },
+        { d: "2027-07-01", type: "Economic (3%)", idx: 4 }
+    ];
+    
+    // Add Anniversaries
+    for (let yr = 2026; yr <= 2027; yr++) {
+        let anniv = new Date(hireDate);
+        anniv.setFullYear(yr);
+        events.push({ d: anniv.toISOString().split('T')[0], type: "Anniversary Step", isStep: true });
+    }
+    
+    events.sort((a, b) => new Date(a.d) - new Date(b.d));
+    
+    events.forEach(e => {
+        let eDate = new Date(e.d + "T00:00:00");
+        let step = getStepAtDate(eDate);
+        let sIdx = e.idx || (eDate < new Date("2026-07-01") ? 2 : (eDate < new Date("2027-07-01") ? 3 : 4));
+        tableHTML += `<tr class="future-row"><td>${eDate.toLocaleDateString('en-CA', dateFmt)}</td><td>${e.type}</td><td>Step ${step}</td><td>${fmt.format(grid[step][sIdx])}</td><td>--</td></tr>`;
+    });
 
     document.getElementById('outOld').innerText = fmt.format(grid[getStepAtDate(today)][0]);
     document.getElementById('outRetro').innerText = fmt.format(retro24 + retro25);
